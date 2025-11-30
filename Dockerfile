@@ -14,26 +14,26 @@ RUN apt-get update && apt-get install -y \
 # Install composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
+# Çalışma klasörü
 WORKDIR /var/www/html
 
-# Copy project files into the container
+# Proje dosyalarını kopyala
 COPY . .
 
-# Give permissions for Laravel
+# Apache'nin DocumentRoot'unu /public yap
+RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
+
+# Laravel için izinler
 RUN mkdir -p storage/framework/{sessions,views,cache,data} \
     && mkdir -p bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# Install PHP dependencies (Laravel vendors)
+# PHP bağımlılıklarını yükle
 RUN composer install --no-dev --optimize-autoloader
 
-# BURADA HİÇ artisan KOMUTU YOK
-# (config:clear, cache:clear, view:clear, route:cache vs. hepsi kaldırıldı)
-
-# Expose port
-
+# Port
+EXPOSE 80
 
 CMD ["apache2-foreground"]
 

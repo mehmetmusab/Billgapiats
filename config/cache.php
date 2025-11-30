@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Str;
+
 return [
 
     /*
@@ -7,8 +9,8 @@ return [
     | Default Cache Store
     |--------------------------------------------------------------------------
     |
-    | Burayı özellikle "file" yaptık ki ENV ne olursa olsun
-    | veritabanı cache driver'ını kullanmasın.
+    | Burayı özellikle "file" yaptık ki, yanlışlıkla env'de
+    | CACHE_DRIVER=database yazsa bile uygulama file kullansın.
     |
     */
 
@@ -27,8 +29,6 @@ return [
             'path' => storage_path('framework/cache/data'),
         ],
 
-        // İstersen ileride kullanırsın diye bırakıyoruz ama default file olduğu için
-        // Laravel kendiliğinden buna geçmeyecek.
         'database' => [
             'driver' => 'database',
             'table' => 'cache',
@@ -60,3 +60,4 @@ return [
     'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache'),
 
 ];
+

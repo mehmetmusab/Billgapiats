@@ -1,34 +1,40 @@
 FROM php:8.2-apache
 
-# Apache mod_rewrite
+# Enable Apache mods
 RUN a2enmod rewrite
+RUN service apache2 restart
 
-# PHP uzantıları
+# Install dependencies
 RUN apt-get update && apt-get install -y \
     git \
+    zip \
     unzip \
     libzip-dev \
-    libpng-dev && \
-    docker-php-ext-install pdo pdo_mysql zip
+    && docker-php-ext-install pdo_mysql zip
 
-# Çalışma dizini
+# Install composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Set working directory
 WORKDIR /var/www/html
 
-# Proje dosyalarını kopyala
-COPY . /var/www/html
+# Copy project
+COPY . .
 
-# Public klasörünü Apache için DocumentRoot yap
-RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf \
-    && sed -i 's|/var/www/|/var/www/html/public|g' /etc/apache2/apache2.conf
+# Give permissions for Laravel
+RUN mkdir -p storage/framework/{sessions,views,cache,data} \
+    && mkdir -p bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache
 
-# Storage ve cache için izinler
-RUN mkdir -p storage bootstrap/cache \
-    && chmod -R 777 storage bootstrap/cache
-
-# Composer ekle ve paketleri yükle
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
+# Optimize Laravel
+RUN php artisan config:clear && php artisan cache:clear && php artisan route:clear && php artisan view:clear
+RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
+
+# Expose port
 EXPOSE 80
 
 CMD ["apache2-foreground"]

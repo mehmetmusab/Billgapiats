@@ -8,13 +8,9 @@ return [
     |--------------------------------------------------------------------------
     | Default Cache Store
     |--------------------------------------------------------------------------
-    |
-    | Burayı özellikle "file" yaptık ki, yanlışlıkla env'de
-    | CACHE_DRIVER=database yazsa bile uygulama file kullansın.
-    |
     */
 
-    'default' => 'file',
+    'default' => env('CACHE_DRIVER', 'file'),
 
     /*
     |--------------------------------------------------------------------------
@@ -29,16 +25,15 @@ return [
             'path' => storage_path('framework/cache/data'),
         ],
 
+        'array' => [
+            'driver' => 'array',
+            'serialize' => false,
+        ],
+
         'database' => [
             'driver' => 'database',
             'table' => 'cache',
             'connection' => null,
-            'lock_connection' => null,
-        ],
-
-        'array' => [
-            'driver' => 'array',
-            'serialize' => false,
         ],
 
         'redis' => [
@@ -57,7 +52,10 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache'),
+    'prefix' => env(
+        'CACHE_PREFIX',
+        Str::slug(env('APP_NAME', 'laravel'), '_') . '_cache'
+    ),
 
 ];
 

@@ -1,31 +1,30 @@
 # PHP 8.2 + Apache
 FROM php:8.2-apache
 
-# Sistem paketleri
+# Gerekli sistem paketleri
 RUN apt-get update && apt-get install -y \
     git unzip libzip-dev libonig-dev libpq-dev libpng-dev \
     && docker-php-ext-install pdo pdo_mysql zip
 
-# Apache modu
+# Apache mod_rewrite
 RUN a2enmod rewrite
-
-# Proje dosyalarını kopyala
-COPY . /var/www/html
 
 # Çalışma dizini
 WORKDIR /var/www/html
 
-# Composer yükle
+# Proje dosyalarını kopyala
+COPY . /var/www/html
+
+# Composer'ı image'a ekle
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Composer install
-RUN composer install --no-dev --optimize-autoloader
+# Storage ve cache dizinlerini oluştur, izin ver ve sonra composer install çalıştır
+RUN mkdir -p storage bootstrap/cache \
+    && chmod -R 777 storage bootstrap/cache \
+    && composer install --no-dev --optimize-autoloader
 
-# Storage izinleri
-RUN chmod -R 777 storage bootstrap/cache
-
-# Port aç
+# Uygulama 80 portundan yayın yapacak
 EXPOSE 80
 
-# Başlangıç komutu
+# Apache'yi foreground'da çalıştır
 CMD ["apache2-foreground"]

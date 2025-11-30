@@ -29,13 +29,11 @@ RUN mkdir -p storage/framework/{sessions,views,cache,data} \
 # Install PHP dependencies (Laravel vendors)
 RUN composer install --no-dev --optimize-autoloader
 
-# Optimize Laravel
-# DİKKAT: cache:clear'ı BURADAN SİLDİK
-RUN php artisan config:clear && php artisan route:clear && php artisan view:clear
-RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
+# BURADA HİÇ artisan KOMUTU YOK
+# (config:clear, cache:clear, view:clear, route:cache vs. hepsi kaldırıldı)
 
-# Expose port 80 for Apache
-EXPOSE 80
+# Expose port
+
 
 CMD ["apache2-foreground"]
 
